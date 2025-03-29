@@ -1,0 +1,22 @@
+{
+    "clangd.fallbackFlags": [
+      "-I${workspaceFolder}/ext/fmt/include",
+      "-I${workspaceFolder}/ext/headers",
+      "-I${workspaceFolder}/src",
+    ],
+    "clangd.enable": true,
+    "clangd.inactiveRegions.useBackgroundHighlight": true,
+    "clangd.path": "clangd",
+    "editor.inlayHints.enabled": "offUnlessPressed",
+    "editor.inlayHints.padding": true,
+    "editor.inlayHints.fontFamily": "Consolas",
+    "clangd.arguments": [
+      "--compile-commands-dir=build"
+    ],
+    "files.insertFinalNewline": true,
+    "files.associations": {
+      "*.pkg": "systemverilog",
+      "*.inc": "cpp",
+      "valarray": "cpp"
+    },
+}
