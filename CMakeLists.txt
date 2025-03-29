@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(dramsim3)
 
+# Generate compile_commands.json for clang based tools
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(default_build_type "Release")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to '${default_build_type}' as none was specified.")

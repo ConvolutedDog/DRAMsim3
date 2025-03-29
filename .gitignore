@@ -13,6 +13,7 @@ release
 *.pyc
 *.vh
 .vs/
+*.pdf
 
 # Compiled Object files
 *.slo
@@ -46,3 +47,5 @@ release
 
 # IDEs / Editors
 .vscode/
+tasks.json
+.cache/
