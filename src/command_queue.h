@@ -32,6 +32,7 @@ private:
                           const CMDQueue &queue) const;
   bool HasRWDependency(const CMDIterator &cmd_it, const CMDQueue &queue) const;
   Command GetFirstReadyInQueue(CMDQueue &queue) const;
+  /// @brief Return the index of the queue.
   int GetQueueIndex(int rank, int bankgroup, int bank) const;
   CMDQueue &GetQueue(int rank, int bankgroup, int bank);
   CMDQueue &GetNextQueue();
@@ -44,6 +45,9 @@ private:
   const ChannelState &channel_state_;
   SimpleStats &simple_stats_;
 
+  /// @brief The size of command queues is config_.banks * config_.ranks when
+  /// the queue structure is PER_BANK, or config_.ranks when it is PER_RANK.
+  /// Each item in queues_[.] is std::vector<Command>(config_.cmd_queue_size).
   std::vector<CMDQueue> queues_;
 
   // Refresh related data structures

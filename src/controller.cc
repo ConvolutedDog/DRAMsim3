@@ -60,11 +60,22 @@ std::pair<uint64_t, int> Controller::ReturnDoneTrans(uint64_t clk) {
 
 void Controller::ClockTick() {
   // update refresh counter
+  /// Calculate if this cycle should do refresh, and append the refresh command
+  /// into the refresh_q_. Here, the refresh controller will only send REFRESH
+  /// or REFRESH_BANK command into the refresh_q_.
   refresh_.ClockTick();
 
   bool cmd_issued = false;
   Command cmd;
+  /// If the refresh_q_ is not empty, we will do some refresh.
+  /// bool IsRefreshWaiting() const { return !refresh_q_.empty(); }
+  /// FinishRefresh will try to extract a refresh command from the front of the
+  /// refresh_q_, and set ref_q_indices_ according to this command.
+  ///
+  /// In fact, if there are refresh commands that are in the refresh_q_, we
+  /// should fitstly ececute the refresh commands.
   if (channel_state_.IsRefreshWaiting()) {
+    /// Return the refresh command or the precharge command.
     cmd = cmd_queue_.FinishRefresh();
   }
 
@@ -158,6 +169,16 @@ bool Controller::AddTransaction(Transaction trans) {
   simple_stats_.AddValue("interarrival_latency", clk_ - last_trans_clk_);
   last_trans_clk_ = clk_;
 
+  /// @brief If the trans is write, we should first check if there has been a
+  /// same trans in the pending write queue, and if exists, we can just put
+  /// this trans into the return queue; if not exists, we just append this trans
+  /// in the tailing of pending write queue and also unified queue or write
+  /// buffer.
+  /// If the trans is read, we should check if there has been a same trans in
+  /// the write buffer, and we can use this result directly if there exists and
+  /// just append this in the tailing of return queue. If not exists, we just
+  /// append this trans in the tailing of pending read queue and also unified
+  /// queue or read buffer.
   if (trans.is_write) {
     if (pending_wr_q_.count(trans.addr) == 0) {  // can not merge writes
       pending_wr_q_.insert(std::make_pair(trans.addr, trans));

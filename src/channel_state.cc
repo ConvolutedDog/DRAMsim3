@@ -71,12 +71,23 @@ void ChannelState::RankNeedRefresh(int rank, bool need) {
   return;
 }
 
+/// cmd is in the refresh queue.
 Command ChannelState::GetReadyCommand(const Command &cmd, uint64_t clk) const {
   Command ready_cmd = Command();
+  /// bool IsRankCMD() const {
+  ///   return cmd_type == CommandType::REFRESH ||
+  ///   cmd_type == CommandType::SREF_ENTER ||
+  ///   cmd_type == CommandType::SREF_EXIT;
+  /// }
   if (cmd.IsRankCMD()) {
+    /// Here, num_ready is the counter that counts the number of ready banks.
+    /// If the bank is open, the bank should firstly pre-charge.
     int num_ready = 0;
     for (auto j = 0; j < config_.bankgroups; j++) {
       for (auto k = 0; k < config_.banks_per_group; k++) {
+        /// We here need to choose the right command according to the current
+        /// state of the bank. And if the bank state is open, and it should
+        /// firstly pre-charge, so ready_cmd may be PRECHARGE command here.
         ready_cmd = bank_states_[cmd.Rank()][j][k].GetReadyCommand(cmd, clk);
         if (!ready_cmd.IsValid()) {  // Not ready
           continue;
@@ -91,12 +102,14 @@ Command ChannelState::GetReadyCommand(const Command &cmd, uint64_t clk) const {
       }
     }
     // All bank ready
+    /// If all banks are all ready to refresh, we can send back the command.
     if (num_ready == config_.banks) {
       return ready_cmd;
     } else {
       return Command();
     }
   } else {
+    /// For other commands.
     ready_cmd =
         bank_states_[cmd.Rank()][cmd.Bankgroup()][cmd.Bank()].GetReadyCommand(
             cmd, clk);
@@ -104,6 +117,7 @@ Command ChannelState::GetReadyCommand(const Command &cmd, uint64_t clk) const {
       return Command();
     }
     if (ready_cmd.cmd_type == CommandType::ACTIVATE) {
+      /// Check if FAW or 32AW is ok for the rank.
       if (!ActivationWindowOk(ready_cmd.Rank(), clk)) {
         return Command();
       }
@@ -137,6 +151,7 @@ void ChannelState::UpdateState(const Command &cmd) {
 
 void ChannelState::UpdateTiming(const Command &cmd, uint64_t clk) {
   switch (cmd.cmd_type) {
+    /// Update the tFAW window, and update the t32AW window for the GDDR.
     case CommandType::ACTIVATE: UpdateActivationTimes(cmd.Rank(), clk);
     case CommandType::READ:
     case CommandType::READ_PRECHARGE:
@@ -284,6 +299,16 @@ void ChannelState::UpdateActivationTimes(int rank, uint64_t curr_time) {
   return;
 }
 
+///        tFAW
+/// |----------------->
+///    |----------------->
+///        | We have at least at this cycle if there has been 4 cycles in the
+///        window.
+///        |-----------------> // the latest cycle appended.
+///      |----------------->
+/// For example, if we have append 4 cycle in four_aw_, which means that from
+/// the latest time we append a new cycle, in this tFAW window, it cannot issue
+/// new activate commands.
 bool ChannelState::IsFAWReady(int rank, uint64_t curr_time) const {
   if (!four_aw_[rank].empty()) {
     if (curr_time < four_aw_[rank][0] && four_aw_[rank].size() >= 4) {

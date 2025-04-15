@@ -44,6 +44,10 @@ private:
   const Config &config_;
   SimpleStats simple_stats_;
   ChannelState channel_state_;
+  /// @brief In this controller of one channel, there is a CommandQueue, and
+  /// it contains command queues whose size is config_.banks * config_.ranks
+  /// when the queue structure is PER_BANK, or config_.ranks when it is
+  /// PER_RANK.
   CommandQueue cmd_queue_;
   Refresh refresh_;
 

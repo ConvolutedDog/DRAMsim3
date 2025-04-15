@@ -32,6 +32,7 @@ public:
                                      bool is_write) const = 0;
   virtual bool AddTransaction(uint64_t hex_addr, bool is_write) = 0;
   virtual void ClockTick() = 0;
+  /// @brief Calculate the channel according to the acess address.
   int GetChannel(uint64_t hex_addr) const;
 
   std::function<void(uint64_t req_id)> read_callback_, write_callback_;
@@ -50,6 +51,7 @@ protected:
 #endif  // THERMAL
 
   uint64_t clk_;
+  /// @brief Each channel has one its own cntroller.
   std::vector<Controller *> ctrls_;
 
 #ifdef ADDR_TRACE
@@ -64,8 +66,13 @@ public:
                   std::function<void(uint64_t)> read_callback,
                   std::function<void(uint64_t)> write_callback);
   ~JedecDRAMSystem();
+  /// @brief Calculate the channel index of the address and then see if the
+  /// channel will accept this address.
   bool WillAcceptTransaction(uint64_t hex_addr, bool is_write) const override;
   bool AddTransaction(uint64_t hex_addr, bool is_write) override;
+  /// @brief Erase all of the trans that has been in the return queue, cause
+  /// they has been completed. Then make all of the controllers that belongs to
+  /// the current DRAM execute for a cycle.
   void ClockTick() override;
 };
 

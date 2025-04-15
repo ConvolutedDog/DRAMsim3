@@ -57,6 +57,7 @@ enum class CommandType {
   SIZE
 };
 
+/// @brief There are 10 command types.
 struct Command {
   Command() : cmd_type(CommandType::SIZE), hex_addr(0) {}
   Command(CommandType cmd_type, const Address &addr, uint64_t hex_addr)
@@ -82,6 +83,9 @@ struct Command {
            cmd_type == CommandType::SREF_ENTER ||
            cmd_type == CommandType::SREF_EXIT;
   }
+  /// @brief There are 10 command types which are read, read and precharge,
+  /// write, write and precharge, activate, precharge, refresh bank, refresh,
+  /// self enter, self exit.
   CommandType cmd_type;
   Address addr;
   uint64_t hex_addr;
