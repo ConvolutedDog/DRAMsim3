@@ -52,11 +52,7 @@ private:
   /// @brief Each rank has a flag indicates if the rank is in the state of the
   /// refresh. Only after the self refresh command is issued, the rank will set
   /// rank_is_sref_[.] to be true, and after the self exit command is issued,
-  /// the rank can set this flag to be false.
   std::vector<bool> rank_is_sref_;
-  /// @brief Rank -> Bank Group -> Bank.
-  std::vector<std::vector<std::vector<BankState>>> bank_states_;
-  /// @brief Put the refresh command into the refresh_q.
   std::vector<Command> refresh_q_;
 
   /// @brief See the defination of function of IsFAWReady. It stores up to 4

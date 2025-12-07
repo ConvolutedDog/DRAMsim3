@@ -6,10 +6,17 @@ Refresh::Refresh(const Config &config, ChannelState &channel_state)
       refresh_policy_(config.refresh_policy), next_rank_(0), next_bg_(0),
       next_bank_(0) {
   if (refresh_policy_ == RefreshPolicy::RANK_LEVEL_SIMULTANEOUS) {
+    /// All Rank is refreshed at the same time at the tREFI interval (Global
+    /// Refresh Interval).
     refresh_interval_ = config_.tREFI;
   } else if (refresh_policy_ == RefreshPolicy::BANK_LEVEL_STAGGERED) {
+    /// Bank interleaved refresh with tREFIb interval (Bank-level refresh
+    /// interval).
     refresh_interval_ = config_.tREFIb;
   } else {  // default refresh scheme: RANK STAGGERED
+    /// Rank staggered refreshes at intervals of tREFI / ranks (evenly split to
+    /// each rank). This means that every interval of tREFI / ranks is refreshed
+    /// by one rank.
     refresh_interval_ = config_.tREFI / config_.ranks;
   }
 }
@@ -22,6 +29,12 @@ void Refresh::ClockTick() {
   return;
 }
 
+/// IsRankSelfRefreshing: Self-Refresh Mode is a low-power state in which Rank
+/// stops responding to external commands (such as read and write requests) when
+/// it enters this mode, relying solely on internal circuitry to periodically
+/// refresh data to maintain content. When the CommandType::SREF_ENTER command
+/// is sent, rank enters self-refresh mode; and when the CommandType::SREF_EXIT
+/// command is sent, it exits self-refresh mode.
 void Refresh::InsertRefresh() {
   switch (refresh_policy_) {
     // Simultaneous all rank refresh

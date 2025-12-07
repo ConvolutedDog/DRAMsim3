@@ -19,6 +19,8 @@ namespace dramsim3 {
 
 enum class RowBufPolicy { OPEN_PAGE, CLOSE_PAGE, SIZE };
 
+/// @brief Each channel has one its own controller. This controller has a
+/// refresh controller.
 class Controller {
 public:
 #ifdef THERMAL
@@ -56,6 +58,8 @@ private:
 #endif  // THERMAL
 
   // queue that takes transactions from CPU side
+  /// @brief Whether the unified queue (combined read queue and write queue) is
+  /// used.
   bool is_unified_queue_;
   std::vector<Transaction> unified_queue_;
   std::vector<Transaction> read_queue_;

@@ -19,4 +19,5 @@
       "*.inc": "cpp",
       "valarray": "cpp"
     },
+    "editor.fontLigatures": false
 }

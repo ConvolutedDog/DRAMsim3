@@ -31,6 +31,8 @@ CommandQueue::CommandQueue(int channel_id, const Config &config,
 }
 
 Command CommandQueue::GetCommandToIssue() {
+  /// num_queues is the number of banks within a rank if PER_BANK, and the
+  /// numver of ranks if PER_RANK.
   for (int i = 0; i < num_queues_; i++) {
     auto &queue = GetNextQueue();
     // if we're refresing, skip the command queues that are involved

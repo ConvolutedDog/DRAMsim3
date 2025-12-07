@@ -43,6 +43,7 @@ Address Config::AddressMapping(uint64_t hex_addr) const {
 
 void Config::CalculateSize() {
   // calculate rank and re-calculate channel_size
+  // See `device` in this code to be a memory array.
   devices_per_rank = bus_width / device_width;
   int page_size = columns * device_width / 8;  // page size in bytes
   int megs_per_bank = page_size * (rows / 1024) / 1024;
